@@ -14,6 +14,7 @@ mvn clean package
 cp target/${CF_APP_NAME}.jar ${BASE}/built-core/
 cp pom.xml ${BASE}/built-core/
 ls ${BASE}/built-core
+echo "Contents in built-core:$(ls ${BASE}/built-core)"
 
 STATUS=$?
 echo $STATUS
