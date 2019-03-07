@@ -224,7 +224,7 @@ jobs:
       outputs:
         - name: updated-core
       run:
-        path: ./build-scripts/build-promote-to-repo/build-next-snapshot.sh
+        path: ./build-scripts/CICD-pivotal-bank-demo/build-next-snapshot.sh
       params:
         WORKING_DIR: ((resource-working-directory))
       caches:
