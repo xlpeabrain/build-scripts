@@ -39,5 +39,7 @@ cat built-core-op/manifest.yml
 echo "Contents in built-core-op: $(ls built-core-op)"
 
 cd built-core-op
+#Temporarily disable the blue green deploy to prevent disabling the API binding
+#cf bgd ${CF_APP_NAME} -delete-old-apps
 
-cf bgd ${CF_APP_NAME} -delete-old-apps
+cf push
