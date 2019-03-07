@@ -15,12 +15,12 @@ bintray-uri:
 bintray-artifact:
 bintray-local-artifact:
 
-#Parameters for Gist
+#Gist Parameters used as temp store for some values
 resource-github-url:
 resource-github-branch:
 resource-github-private-key:
 
-#Parameters for Cloud Foundry
+#Cloud Foundry Parameters
 cf-api:
 cf-username:
 cf-password:
