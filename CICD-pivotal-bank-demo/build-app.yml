@@ -73,15 +73,16 @@ jobs:
         CF_APP_NAME: ((current_app_name))
       caches:
         - path: maven
-#Update app version
-  - put: version-resource-gist
-    params:
-      repository: updated-gist
 #Deploy to maven repository
   - put: maven-artifact
     params:
       file: built-core/((bintray-local-artifact))
       pom_file: built-core/pom.xml
+
+#Update app version
+  - put: version-resource-gist
+    params:
+      repository: updated-gist
 
 - name: deploy-to-dev
   plan:

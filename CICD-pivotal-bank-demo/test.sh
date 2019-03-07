@@ -17,7 +17,7 @@ cf --version
 echo "Running: cf login -a ${CF_API} --skip-ssl-validation -o ${CF_ORG} -s ${CF_SPACE}"
 cf login -a ${CF_API} --skip-ssl-validation -o ${CF_ORG} -s ${CF_SPACE} -u ${CF_USERNAME} -p ${CF_PASSWORD}
 
-APP_ROUTE=$(cf app core| grep routes | sed 's/routes:[ \t]*//')
+APP_ROUTE=$(cf app ${CF_APP_NAME}| grep routes | sed 's/routes:[ \t]*//')
 
 echo "${APP_ROUTE}"
 
