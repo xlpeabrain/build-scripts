@@ -1,0 +1,234 @@
+resource_types:
+- name: maven-resource
+  type: docker-image
+  source:
+    repository: nulldriver/maven-resource
+    tag: latest
+
+- name: cf-cli-resource
+  type: docker-image
+  source:
+    repository: nulldriver/cf-cli-resource
+    tag: latest
+
+resources:
+- name: git-resource-core
+  type: git
+  source:
+    uri: ((resource-core-uri))
+    branch: ((resource-core-branch))
+    private_key: ((resource-github-private-key))
+
+- name: build-scripts
+  type: git
+  source:
+    uri: ((resource-scripts-uri))
+    branch: ((resource-scripts-branch))
+    private_key: ((bitbucket-private-key))
+
+- name: maven-artifact
+  type: maven-resource
+  source:
+    url: ((bintray-uri))
+    artifact: ((bintray-artifact))
+    username: ((bintray-username))
+    password: ((bintray-password))
+    disable_redeploy: "false"
+
+- name: version-resource-gist
+  type: git
+  source:
+    branch: ((resource-github-branch))
+    uri: ((resource-github-url))
+    private_key: ((resource-github-private-key))
+
+jobs:
+#Update version and Build the project
+- name: build-project
+  serial: true
+  plan:
+  - aggregate:
+    - get: git-resource-core
+    - get: build-scripts
+    - get: version-resource-gist
+  - task: build-core
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: maven
+          tag: 3.6-jdk-11-slim
+      inputs:
+        - name: git-resource-core
+        - name: build-scripts
+        - name: version-resource-gist
+      outputs:
+        - name: built-core
+        - name: updated-gist
+      run:
+        path: ./build-scripts/CICD-pivotal-bank-demo/build-release.sh
+      params:
+        WORKING_DIR: ((resource-working-directory))
+        CF_APP_NAME: ((current_app_name))
+      caches:
+        - path: maven
+#Update app version
+  - put: version-resource-gist
+    params:
+      repository: updated-gist
+#Deploy to maven repository
+  - put: maven-artifact
+    params:
+      file: built-core/((bintray-local-artifact))
+      pom_file: built-core/pom.xml
+
+- name: deploy-to-dev
+  plan:
+  - get: version-resource-gist
+    passed: [build-project]
+    trigger: true
+  - get: build-scripts
+  - task: copy-op
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: maven
+          tag: 3.6-jdk-11-slim
+      inputs:
+        - name: version-resource-gist
+        - name: build-scripts
+      outputs:
+        - name: built-core-op
+      run:
+        path: ./build-scripts/CICD-pivotal-bank-demo/bgd-deploy.sh
+      params:
+        CF_API: ((cf-api))
+        CF_USERNAME: ((cf-username))
+        CF_PASSWORD: ((cf-password))
+        CF_ORG: ((cf-org))
+        CF_SPACE: ((cf-dev-space))
+        CF_APP_NAME: ((current_app_name))
+
+#  Run tests in test environment
+- name: test-dev-deployment
+  plan:
+    - get: version-resource-gist
+      passed: [deploy-to-dev]
+      trigger: true
+    - get: build-scripts
+    - task: copy-op
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: maven
+            tag: 3.6-jdk-11-slim
+        inputs:
+          - name: version-resource-gist
+          - name: build-scripts
+        outputs:
+          - name: built-core-op
+        run:
+          path: ./build-scripts/CICD-pivotal-bank-demo/test.sh
+        params:
+          CF_API: ((cf-api))
+          CF_USERNAME: ((cf-username))
+          CF_PASSWORD: ((cf-password))
+          CF_ORG: ((cf-org))
+          CF_SPACE: ((cf-dev-space))
+          CF_APP_NAME: ((current_app_name))
+
+#Deploy to Prod
+- name: deploy-to-prod
+  plan:
+    - get: version-resource-gist
+      passed: [test-dev-deployment]
+      trigger: true
+    - get: build-scripts
+    - task: copy-op
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: maven
+            tag: 3.6-jdk-11-slim
+        inputs:
+          - name: version-resource-gist
+          - name: build-scripts
+        outputs:
+          - name: built-core-op
+        run:
+          path: ./build-scripts/CICD-pivotal-bank-demo/bgd-deploy.sh
+        params:
+          CF_API: ((cf-api))
+          CF_USERNAME: ((cf-username))
+          CF_PASSWORD: ((cf-password))
+          CF_ORG: ((cf-org))
+          CF_SPACE: ((cf-prod-space))
+          CF_APP_NAME: ((current_app_name))
+#Run test in prod
+- name: test-prod-deployment
+  plan:
+    - get: version-resource-gist
+      passed: [deploy-to-prod]
+      trigger: true
+    - get: build-scripts
+    - task: copy-op
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source:
+            repository: maven
+            tag: 3.6-jdk-11-slim
+        inputs:
+          - name: version-resource-gist
+          - name: build-scripts
+        outputs:
+          - name: built-core-op
+        run:
+          path: ./build-scripts/CICD-pivotal-bank-demo/test.sh
+        params:
+          CF_API: ((cf-api))
+          CF_USERNAME: ((cf-username))
+          CF_PASSWORD: ((cf-password))
+          CF_ORG: ((cf-org))
+          CF_SPACE: ((cf-prod-space))
+          CF_APP_NAME: ((current_app_name))
+
+# Update version to next version and build
+- name: update-snapshot
+  plan:
+  - get: git-resource-core
+  - get: maven-artifact
+  - get: build-scripts
+    passed: [test-prod-deployment]
+    trigger: true
+  - task: build-next-snapshot
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: maven
+          tag: 3.6-jdk-11-slim
+      inputs:
+        - name: git-resource-core
+        - name: build-scripts
+      outputs:
+        - name: updated-core
+      run:
+        path: ./build-scripts/build-promote-to-repo/build-next-snapshot.sh
+      params:
+        WORKING_DIR: ((resource-working-directory))
+      caches:
+        - path: maven
+# Commit changes to git repository
+  - put: git-resource-core
+    params:
+      repository: updated-core

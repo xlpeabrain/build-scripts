@@ -1,0 +1,31 @@
+#Parameters for the source project to be developed
+resource-core-uri:
+resource-core-branch:
+#directory of the project, if not at the root of git project
+resource-working-directory:
+
+#Parameters for the repository for build scripts
+resource-scripts-uri:
+resource-scripts-branch:
+bitbucket-private-key:
+#Parameters for the Artifact repository for built objects
+bintray-username:
+bintray-password:
+bintray-uri:
+bintray-artifact:
+bintray-local-artifact:
+
+#Parameters for Gist
+resource-github-url:
+resource-github-branch:
+resource-github-private-key:
+
+#Parameters for Cloud Foundry
+cf-api:
+cf-username:
+cf-password:
+cf-skip_cert_check:
+cf-org:
+cf-dev-space:
+cf-prod-space:
+current_app_name:
