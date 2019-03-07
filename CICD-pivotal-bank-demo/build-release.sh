@@ -33,7 +33,7 @@ else
 
     cd updated-gist
 #    echo $(ls)
-    echo $(mvn help:evaluate -Dexpression=project.version -q -DforceStdout -f=../git-resource-core/pom.xml) > ${CF_APP_NAME}-release-version
+    echo $(mvn help:evaluate -Dexpression=project.version -q -DforceStdout -f=${BASE}/git-resource-core/pom.xml) > ${CF_APP_NAME}-release-version
     cp ${BASE}/git-resource-core/${WORKING_DIR}/manifest.yml .
     cp ${BASE}/git-resource-core/${WORKING_DIR}/pom.xml .
 
