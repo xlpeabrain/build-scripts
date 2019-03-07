@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-echo "Environment Variables"
-env
-echo "End env variables"
-
 echo "Setting up CF Cli"
 # ...or Linux 64-bit binary
 curl -L "https://packages.cloudfoundry.org/stable?release=linux64-binary&source=github" | tar -zx
