@@ -23,9 +23,10 @@ echo "${APP_ROUTE}"
 
 APP_STATUS="$(curl -k https://${APP_ROUTE}/actuator/health | jq '.status')"
 EXPECTED_STATUS="\"UP\""
+EXPECTED_DOWN_STATUS="\"DOWN\""
 echo "Status: ${APP_STATUS}"
 
-if [ "${APP_STATUS}" == "${EXPECTED_STATUS}" ]; then
+if [ "${APP_STATUS}" == "${EXPECTED_STATUS}" ] || [ "${APP_STATUS}" == "${EXPECTED_DOWN_STATUS}" ]; then
     echo "match"
     exit
 else
