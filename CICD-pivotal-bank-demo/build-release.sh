@@ -11,7 +11,7 @@ cd git-resource-core
 cd $WORKING_DIR
 mvn build-helper:parse-version versions:set -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.incrementalVersion} versions:commit
 mvn clean package
-cp target/core.jar ${BASE}/built-core/
+cp target/${CF_APP_NAME}.jar ${BASE}/built-core/
 cp pom.xml ${BASE}/built-core/
 ls ${BASE}/built-core
 
@@ -36,7 +36,6 @@ else
     echo $(mvn help:evaluate -Dexpression=project.version -q -DforceStdout -f=../git-resource-core/pom.xml) > ${CF_APP_NAME}-release-version
     cp ${BASE}/git-resource-core/${WORKING_DIR}/manifest.yml .
     cp ${BASE}/git-resource-core/${WORKING_DIR}/pom.xml .
-    rm -rf core.jar
 
     echo "Contents for gist:$(ls)"
 
