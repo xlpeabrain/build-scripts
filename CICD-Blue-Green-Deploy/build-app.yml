@@ -84,7 +84,7 @@ jobs:
     params:
       repository: updated-gist
 
-- name: deploy-to-dev
+- name: bgd-deploy-to-dev
   plan:
   - get: version-resource-gist
     passed: [build-project]
@@ -144,7 +144,7 @@ jobs:
           CF_APP_NAME: ((current_app_name))
 
 #Deploy to Prod
-- name: deploy-to-prod
+- name: bgd-deploy-to-prod
   plan:
     - get: version-resource-gist
       passed: [test-dev-deployment]
