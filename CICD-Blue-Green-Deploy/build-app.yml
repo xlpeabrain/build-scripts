@@ -117,7 +117,7 @@ jobs:
 - name: test-dev-deployment
   plan:
     - get: version-resource-gist
-      passed: [deploy-to-dev]
+      passed: [bgd-deploy-to-dev]
       trigger: true
     - get: build-scripts
     - task: copy-op
@@ -176,7 +176,7 @@ jobs:
 - name: test-prod-deployment
   plan:
     - get: version-resource-gist
-      passed: [deploy-to-prod]
+      passed: [bgd-deploy-to-prod]
       trigger: true
     - get: build-scripts
     - task: copy-op
